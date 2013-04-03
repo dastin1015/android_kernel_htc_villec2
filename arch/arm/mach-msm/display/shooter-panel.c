@@ -12,6 +12,17 @@
  * GNU General Public License for more details.
  *
  */
+#if defined(CONFIG_ARCH_MSM8X60) && !defined(CONFIG_FB_MSM8960)
+	#include "../../../../drivers/video/msm_8x60/msm_fb.h"
+	#include "../../../../drivers/video/msm_8x60/mipi_dsi.h"
+	#include "../../../../drivers/video/msm_8x60/mdp4.h"
+#elif defined(CONFIG_ARCH_MSM8960) || defined(CONFIG_FB_MSM8960)
+	#include "../../../../drivers/video/msm/msm_fb.h"
+	#include "../../../../drivers/video/msm/mipi_dsi.h"
+	#include "../../../../drivers/video/msm/mdp4.h"
+#else
+	#warning "Unsupported ARCH CONFIG"
+#endif
 
 #include <asm/io.h>
 #include <asm/mach-types.h>
@@ -25,7 +36,6 @@
 #include <linux/spi/spi.h>
 #include <linux/platform_device.h>
 #include <linux/regulator/consumer.h>
-#include <mach/msm_fb.h>
 #include <mach/msm_iomap.h>
 #include <mach/panel_id.h>
 #include <mach/msm_bus_board.h>
@@ -36,7 +46,6 @@
 #include "../devices.h"
 #include "../board-shooter.h"
 #include "../devices-msm8x60.h"
-#include "../../../../drivers/video/msm_8x60/mdp_hw.h"
 
 enum MODE_3D {
 	BARRIER_OFF       = 0,
@@ -1063,7 +1072,7 @@ int shooter_mdp_color_enhance(void)
 int shooter_mdp_gamma(void)
 {
 	PR_DISP_INFO("%s\n", __func__);
-	mdp4_dsi_color_enhancement(mdp_sharp_barrier_off, ARRAY_SIZE(mdp_sharp_barrier_off));
+	/* mdp4_dsi_color_enhancement(mdp_sharp_barrier_off, ARRAY_SIZE(mdp_sharp_barrier_off)); */
 
 	return 0;
 }
@@ -1124,7 +1133,7 @@ static void shooter_3Dpanel_on(bool bLandscape)
 	struct pm8058_pwm_period pwm_conf;
 	int rc;
 
-	led_brightness_switch("lcd-backlight", 255);
+	/* led_brightness_switch("lcd-backlight", 255); */
 
 	if (system_rev >= 1) {
 		pwm_gpio_config.output_value = 1;
@@ -1148,13 +1157,13 @@ static void shooter_3Dpanel_on(bool bLandscape)
 	pwm_enable(pwm_3d);
 
 	if (bLandscape) {
-		mdp4_dsi_color_enhancement(mdp_sharp_barrier_on, ARRAY_SIZE(mdp_sharp_barrier_on));
+		 /* mdp4_dsi_color_enhancement(mdp_sharp_barrier_on, ARRAY_SIZE(mdp_sharp_barrier_on)); */
 		gpio_set_value(SHOOTER_CTL_3D_1, 1);
 		gpio_set_value(SHOOTER_CTL_3D_2, 1);
 		gpio_set_value(SHOOTER_CTL_3D_3, 1);
 		gpio_set_value(SHOOTER_CTL_3D_4, 0);
 	} else {
-		mdp4_dsi_color_enhancement(mdp_sharp_barrier_on, ARRAY_SIZE(mdp_sharp_barrier_on));
+		/* mdp4_dsi_color_enhancement(mdp_sharp_barrier_on, ARRAY_SIZE(mdp_sharp_barrier_on)); */
 		gpio_set_value(SHOOTER_CTL_3D_1, 1);
 		gpio_set_value(SHOOTER_CTL_3D_2, 1);
 		gpio_set_value(SHOOTER_CTL_3D_3, 0);
@@ -1171,7 +1180,7 @@ static void shooter_3Dpanel_off(void)
 		if (rc < 0)
 			pr_err("%s pmic gpio config gpio %d failed\n", __func__, SHOOTER_3DLCM_PD);
 	}
-	mdp4_dsi_color_enhancement(mdp_sharp_barrier_off, ARRAY_SIZE(mdp_sharp_barrier_off));
+	/* mdp4_dsi_color_enhancement(mdp_sharp_barrier_off, ARRAY_SIZE(mdp_sharp_barrier_off)); */
 	pwm_disable(pwm_3d);
 
 	rc = pm8xxx_gpio_config(PM8058_GPIO_PM_TO_SYS(SHOOTER_3DCLK), &clk_gpio_config_off);
@@ -1181,7 +1190,7 @@ static void shooter_3Dpanel_off(void)
 	gpio_set_value(SHOOTER_CTL_3D_2, 0);
 	gpio_set_value(SHOOTER_CTL_3D_3, 0);
 	gpio_set_value(SHOOTER_CTL_3D_4, 0);
-	led_brightness_switch("lcd-backlight", last_br_2d);
+	/* led_brightness_switch("lcd-backlight", last_br_2d); */
 }
 
 static ssize_t show_3D_mode(struct device *dev,
